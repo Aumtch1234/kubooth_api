@@ -42,10 +42,10 @@ $app->post('/zone/insert', function (Request $request, Response $response, array
     $bodyArr = json_decode($body, true);
     $conn = $GLOBALS['conn'];
     $stmt = $conn->prepare("INSERT INTO zone" . 
-        "(zone_name, amount, event_id)".
+        "(zone_name, amount_booth, event_id)".
         "VALUES (?,?,?)");
     $stmt->bind_param("sii",
-        $bodyArr['zone_name'], $bodyArr['amount'], $bodyArr['event_id'],
+        $bodyArr['zone_name'], $bodyArr['amount_booth'], $bodyArr['event_id'],
     );
     $stmt->execute();
     $result = $stmt->affected_rows;
