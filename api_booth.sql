@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 30, 2024 at 12:06 PM
+-- Generation Time: Sep 12, 2024 at 11:36 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,6 +24,25 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `booking`
+--
+
+CREATE TABLE `booking` (
+  `booking_id` int(11) NOT NULL,
+  `booking_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `booking_pay` timestamp NULL DEFAULT NULL,
+  `booth_id` int(11) NOT NULL,
+  `price` double NOT NULL,
+  `bill_img` varchar(255) DEFAULT NULL,
+  `booking_status` varchar(255) NOT NULL,
+  `products_data` varchar(255) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `booth`
 --
 
@@ -31,17 +50,10 @@ CREATE TABLE `booth` (
   `booth_id` int(11) NOT NULL,
   `booth_name` varchar(255) NOT NULL,
   `size` varchar(255) NOT NULL,
-  `products` varchar(255) NOT NULL,
-  `zone_id` int(11) NOT NULL
+  `status` varchar(255) NOT NULL,
+  `price` double NOT NULL,
+  `img` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `booth`
---
-
-INSERT INTO `booth` (`booth_id`, `booth_name`, `size`, `products`, `zone_id`) VALUES
-(13, 'PB', '100x100', 'บัตรเติมเกมส์', 1),
-(14, 'Sab Place', '200*100', 'ปูม้า แต่ปูหมดเหลือแต่ม้า', 16);
 
 -- --------------------------------------------------------
 
@@ -56,15 +68,6 @@ CREATE TABLE `events` (
   `end_at_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
---
--- Dumping data for table `events`
---
-
-INSERT INTO `events` (`event_id`, `event_name`, `start_at_date`, `end_at_date`) VALUES
-(4, 'ขายการ์ดจอ', '2024-08-23', '2024-08-31'),
-(5, 'ผ้าป่า', '2024-08-09', '2024-08-29'),
-(7, 'ขายปูม้า แต่ปูหมด เหลือแต่ม้า', '2024-08-25', '2024-08-30');
-
 -- --------------------------------------------------------
 
 --
@@ -72,7 +75,7 @@ INSERT INTO `events` (`event_id`, `event_name`, `start_at_date`, `end_at_date`) 
 --
 
 CREATE TABLE `users` (
-  `id` int(10) NOT NULL,
+  `user_id` int(10) NOT NULL,
   `fname` varchar(255) NOT NULL,
   `lname` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
@@ -86,12 +89,9 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `fname`, `lname`, `email`, `password`, `phone`, `create_at`, `role`) VALUES
-(6, 'Aum', 'kphs', 'aumt1569@gmail.com', '$2y$10$.Gk1yEh9QcXxH94hMV6eOOAF6RWC9tlBghaHFC4GRusXFv5NWvkN2', '0989520103', '2024-08-02 14:58:47', 'user'),
-(7, 'Aum', 'kphs', 'taweechok.k@ku.th', '$2y$10$2GC.qVVPThiAMQAj8M2TSekn9PNctWKM/HkWkMtILPYgjsxxum9xa', '0989520103', '2024-08-04 07:41:22', 'user'),
-(23, 'Taweechok', 'Kphs', 'taweechok.kh@ku.th', '$2y$10$eAD8iRyfSHlTG8zTZ6fJ1ub2.mNGvYYSAcrezprbCE7Lso6oY7sNe', '0989520101', '2024-08-04 08:24:12', 'user'),
-(26, 'arm', 'KHPS', 'a@gmail.com', '123', '669520103', '2024-08-29 06:36:26', 'user'),
-(27, 'arm', 'KHPS', 'a@gmail.com', '$2y$10$skqaFACzsOA/2alFfci0EOww8k7AI2l4oIjPCR6L/n/OuQ0HXfN32', '669520103', '2024-08-29 06:42:49', 'user');
+INSERT INTO `users` (`user_id`, `fname`, `lname`, `email`, `password`, `phone`, `create_at`, `role`) VALUES
+(34, 'Arm', 'Khps', 'a1@gmail.com', '$2y$10$dElOJh9binHLg/7CdPZjV.bho6DP6k0oTNTuGHvEjHyimAxk3HHH6', '0989520103', '2024-09-08 16:41:20', 'user'),
+(35, 'สมศรี', 'บุญเรือง', 's1@gmail.com', '$2y$10$oPHXYO3S1YQbLj9LPhWS1u7NSqhm9SEcvPCwXNvxSVAod3jNwGgPK', '0989520103', '2024-09-10 13:26:10', 'user');
 
 -- --------------------------------------------------------
 
@@ -102,21 +102,19 @@ INSERT INTO `users` (`id`, `fname`, `lname`, `email`, `password`, `phone`, `crea
 CREATE TABLE `zone` (
   `zone_id` int(11) NOT NULL,
   `zone_name` varchar(255) NOT NULL,
-  `amount` int(11) NOT NULL,
-  `event_id` varchar(255) NOT NULL
+  `amount_booth` int(11) NOT NULL,
+  `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `zone`
---
-
-INSERT INTO `zone` (`zone_id`, `zone_name`, `amount`, `event_id`) VALUES
-(18, 'อาคาร 7', 10, '4'),
-(19, 'อาคาร 14', 10, '4');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `booking`
+--
+ALTER TABLE `booking`
+  ADD PRIMARY KEY (`booking_id`);
 
 --
 -- Indexes for table `booth`
@@ -134,7 +132,7 @@ ALTER TABLE `events`
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `zone`
@@ -147,28 +145,34 @@ ALTER TABLE `zone`
 --
 
 --
+-- AUTO_INCREMENT for table `booking`
+--
+ALTER TABLE `booking`
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
 -- AUTO_INCREMENT for table `booth`
 --
 ALTER TABLE `booth`
-  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT for table `zone`
 --
 ALTER TABLE `zone`
-  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
