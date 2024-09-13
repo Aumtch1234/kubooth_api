@@ -93,11 +93,18 @@ $app->put('/users/name/{users_id}', function (Request $request, Response $respon
     $bodyArr = json_decode($body, true);
     $conn = $GLOBALS['conn'];
 
+    // ตรวจสอบการเชื่อมต่อฐานข้อมูล
+    if (!$conn) {
+        $response->getBody()->write(json_encode(['message' => "การเชื่อมต่อฐานข้อมูลล้มเหลว"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(500);
+    }
+
+    // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
     if (empty($bodyArr['pname']) || empty($bodyArr['fname']) || empty($bodyArr['lname']) || empty($bodyArr['phone']) || empty($bodyArr['email']) || empty($bodyArr['password'])) {
         $response->getBody()->write(json_encode(['message' => "ข้อมูลไม่ครบถ้วน กรุณาตรวจกรอกให้ครบ!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
-    
+
     // ตรวจสอบความยาวรหัสผ่าน
     if (strlen($bodyArr['password']) < 6) {
         $response->getBody()->write(json_encode(['message' => "กรุณาใส่รหัสผ่าน 6 ตัวขึ้นไป!!"]));
@@ -118,7 +125,7 @@ $app->put('/users/name/{users_id}', function (Request $request, Response $respon
 
     // ตรวจสอบสถานะการอัปเดต
     $stmtUpdate = $conn->prepare("UPDATE users 
-        SET pname = ?, fname = ?, lname = ?, phone = ?, email = ?, password = ? 
+        SET pname = ?, fname = ?, lname = ?, phone = ?, email = ?, password = ?, update_at = NOW()
         WHERE user_id = ?"
     );
 
@@ -146,6 +153,7 @@ $app->put('/users/name/{users_id}', function (Request $request, Response $respon
         return $response->withHeader('Content-type', 'application/json')->withStatus(500);
     }
 });
+
 
 
 
