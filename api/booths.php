@@ -42,25 +42,37 @@ $app->post('/booth/insert', function (Request $request, Response $response, arra
     $conn = $GLOBALS['conn'];
 
     // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
-    if (empty($bodyArr['booth_name']) || empty($bodyArr['size']) || empty($bodyArr['status']) || empty($bodyArr['price']) || empty($bodyArr['img'])) {
+    if (empty($bodyArr['booth_name']) || empty($bodyArr['size']) || empty($bodyArr['price']) || empty($bodyArr['img'])) {
         $response->getBody()->write(json_encode(['message' => "ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบ!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
-    }else if($bodyArr['price'] < 0){
+    } else if ($bodyArr['price'] < 0) {
         $response->getBody()->write(json_encode(['message' => "ราคาไม่ถูกต้อง กรุณาตรวจสอบ!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 
-    // เตรียม statement
-    $stmt = $conn->prepare("INSERT INTO booth (booth_name, size, status, price, img) 
-        VALUES (?, ?, ?, ?, ?)"
+    // ตรวจสอบว่ามีชื่อบูธซ้ำหรือไม่
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM booth WHERE booth_name = ?");
+    $stmt->bind_param("s", $bodyArr['booth_name']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    if ($row['count'] > 0) {
+        // ถ้าชื่อบูธซ้ำ
+        $response->getBody()->write(json_encode(['message' => "ชื่อบูธซ้ำ กรุณาตรวจสอบ!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
+    // เตรียม statement สำหรับการ INSERT
+    $stmt = $conn->prepare("INSERT INTO booth (booth_name, size, price, img) 
+        VALUES (?, ?, ?, ?)"
     );
 
     // Bind parameters
     $stmt->bind_param(
-        "sssds",
+        "ssds",
         $bodyArr['booth_name'], // booth_name เป็น string (s)
         $bodyArr['size'],       // size เป็น string (s)
-        $bodyArr['status'],     // status เป็น string (s)
         $bodyArr['price'],      // price ควรเป็น double (d)
         $bodyArr['img']         // img เป็น string (s)
     );
@@ -76,8 +88,6 @@ $app->post('/booth/insert', function (Request $request, Response $response, arra
         return $response->withHeader('Content-type', 'application/json')->withStatus(500);
     }
 });
-
-
 
 // put
 $app->put('/booth/update/{booth_id}', function (Request $request, Response $response, array $args) {

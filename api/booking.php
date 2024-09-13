@@ -44,7 +44,7 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
     $conn = $GLOBALS['conn'];
 
     // ตรวจสอบว่าข้อมูลครบถ้วนหรือไม่
-    if (empty($bodyArr['booth_id']) || empty($bodyArr['booking_status']) || empty($bodyArr['products_data']) || empty($bodyArr['user_id']) || empty($bodyArr['event_id'])) {
+    if (empty($bodyArr['booth_id']) || empty($bodyArr['products_data']) || empty($bodyArr['user_id']) || empty($bodyArr['event_id'])) {
         $response->getBody()->write(json_encode(['message' => "ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบ!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
@@ -64,7 +64,7 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
     }
 
     // ตรวจสอบว่าผู้ใช้จองเกิน 4 ครั้งหรือไม่
-    $checkStmt = $conn->prepare("SELECT COUNT(*) as booking_count FROM booking WHERE user_id = ?");
+    $checkStmt = $conn->prepare("SELECT COUNT(*) as booking_count FROM booking WHERE user_id = ? AND (booking_status = 'อยู่ระหว่างการตรวจสอบ' OR booking_status = 'ชำระเงินแล้ว')");
     $checkStmt->bind_param("i", $bodyArr['user_id']);
     $checkStmt->execute();
     $result = $checkStmt->get_result();
@@ -91,13 +91,12 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
         }
 
         // เตรียม statement สำหรับการเพิ่มข้อมูลลงใน booking พร้อมราคาที่ได้จากบูธ
-        $stmt = $conn->prepare("INSERT INTO booking (booth_id, price, booking_status, products_data, user_id, event_id) 
-            VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO booking (booth_id, price, products_data, user_id, event_id) 
+            VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param(
-            "idssii",
+            "idsii",
             $bodyArr['booth_id'],
             $booth_price,  // ใช้ราคาที่ดึงจากบูธ
-            $bodyArr['booking_status'],
             $bodyArr['products_data'],
             $bodyArr['user_id'],
             $bodyArr['event_id']
@@ -117,7 +116,7 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
         $conn->commit();
 
         // ส่ง response เมื่อการจองสำเร็จ
-        $response->getBody()->write(json_encode(["message" => "คำขอในการจองพื้นที่สำเร็จ!!!"]));
+        $response->getBody()->write(json_encode(["message" => "คำขอในการจองพื้นที่สำเร็จ กรุณาชำระเงิน!!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(200);
     } catch (Exception $e) {
         // ถ้ามีข้อผิดพลาด ให้ rollback
@@ -187,7 +186,7 @@ $app->put('/booking/cancel/{booking_id}', function (Request $request, Response $
 
 
 //payments
-$app->put('/booking/update/payment/{booking_id}', function (Request $request, Response $response, array $args) {
+$app->put('/booking/payment/{booking_id}', function (Request $request, Response $response, array $args) {
     $bookingId = $args['booking_id'];
     $body = $request->getBody();
     $bodyArr = json_decode($body, true);
@@ -198,94 +197,105 @@ $app->put('/booking/update/payment/{booking_id}', function (Request $request, Re
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 
-    // Prepare SQL statement to check the date difference
-    $stmt = $conn->prepare("
-        SELECT 
+    // ตรวจสอบสถานะการจอง
+    $stmtCheck_status = $conn->prepare("SELECT * FROM booking WHERE booking_id = ?");
+    $stmtCheck_status->bind_param("i", $bookingId);
+    $stmtCheck_status->execute();
+    $result_status = $stmtCheck_status->get_result();
+    $statusData = $result_status->fetch_assoc();
+    
+    if (!$statusData) {
+        $response->getBody()->write(json_encode(["message" => "ไม่พบข้อมูลที่ตรงกับ ID"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(404);
+    }
+
+    if ($statusData['booking_status'] == "ชำระเงินแล้ว") {
+        $response->getBody()->write(json_encode(["message" => "ท่านได้ทำการชำระเงินเรียบร้อยแล้ว กรุณารอการตรวจสอบ!! ✅"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(200);
+    }
+
+    // ตรวจสอบเวลาที่เหลือก่อนวันเริ่มงาน
+    $stmt = $conn->prepare("SELECT 
             e.start_at_date, 
             DATEDIFF(e.start_at_date, current_timestamp()) AS days_until_event
         FROM booking b
         JOIN events e ON b.event_id = e.event_id
         WHERE b.booking_id = ?
     ");
-
-    // Bind parameters
     $stmt->bind_param("i", $bookingId);
     $stmt->execute();
     $result = $stmt->get_result();
     $eventData = $result->fetch_assoc();
 
-    if ($eventData) {
-        $daysUntilEvent = $eventData['days_until_event'];
-
-        if ($daysUntilEvent <= 5) {
-            $stmt = $conn->prepare("
-                UPDATE booking b
-                SET b.bill_img = ?, b.booking_pay = current_timestamp(), b.booking_status = 'จองแล้ว'
-                WHERE b.booking_id = ?
-            ");
-
-            $stmt->bind_param(
-                "si",
-                $bodyArr['bill_img'],
-                $bookingId
-            );
-
-            $stmt->execute();
-            $result = $stmt->affected_rows;
-
-            if ($result > 0) {
-                $response->getBody()->write(json_encode(["message" => "จองบูธสำเร็จ!!", "affected_rows" => $result]));
-                return $response->withHeader('Content-type', 'application/json')->withStatus(200);
-            } else {
-                $response->getBody()->write(json_encode(["message" => "ไม่พบข้อมูลที่ตรงกับ ID หรือไม่สามารถจองบูธได้"]));
-                return $response->withHeader('Content-type', 'application/json')->withStatus(404);
-            }
-        } else {
-            $stmt = $conn->prepare("
-                UPDATE booking b
-                SET b.booking_status = 'ว่าง'
-                WHERE b.booking_id = ?
-            ");
-            $stmt->bind_param(
-                "i",
-                $bookingId
-            );
-            $stmt->execute();
-            $response->getBody()->write(json_encode(["message" => "ชำระเงินไม่สำเร็จ หรือ ต้องไม่เกิน 5 วันเริ่มงาน/กิจกรรม!!", 
-            "date_start" => $eventData['start_at_date'],
-            "payment_date" => $daysUntilEvent
-        ]));
-            return $response->withHeader('Content-type', 'application/json')->withStatus(400);
-        }
-    } else {
+    if (!$eventData) {
         $response->getBody()->write(json_encode(["message" => "ไม่พบข้อมูลที่ตรงกับ ID"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(404);
+    }
+
+    $daysUntilEvent = $eventData['days_until_event'];
+
+    if ($daysUntilEvent >= 5) {
+        // อัปเดตการชำระเงิน
+        $stmt = $conn->prepare("UPDATE booking 
+            SET bill_img = ?, booking_pay = current_timestamp(), booking_status = 'ชำระเงินแล้ว'
+            WHERE booking_id = ?");
+        $stmt->bind_param("si", $bodyArr['bill_img'], $bookingId);
+        $stmt->execute();
+
+        if ($stmt->affected_rows > 0) {
+            $response->getBody()->write(json_encode(["message" => "ชำระเงินเรียบร้อยแล้ว ขั้นตอนต่อไปโปรดรอการอนุมัติ!!", "เริ่มงาน/กิจกรรมในอีก" => "$daysUntilEvent วัน"]));
+            return $response->withHeader('Content-type', 'application/json')->withStatus(200);
+        } else {
+            $response->getBody()->write(json_encode(["message" => "ไม่สามารถอัปเดตข้อมูลได้"]));
+            return $response->withHeader('Content-type', 'application/json')->withStatus(500);
+        }
+    } else {
+        // ยกเลิกการจองและอัปเดตสถานะบูธ
+        $stmt = $conn->prepare("UPDATE booking SET booking_status = 'ยกเลิกการจอง' WHERE booking_id = ?");
+        $stmt->bind_param("i", $bookingId);
+        $stmt->execute();
+
+        $stmt_booth = $conn->prepare("UPDATE booth b
+            JOIN booking bk ON b.booth_id = bk.booth_id
+            SET b.status = 'ว่าง'
+            WHERE bk.booking_id = ?");
+        $stmt_booth->bind_param("i", $bookingId);
+        $stmt_booth->execute();
+
+        $response->getBody()->write(json_encode([
+            "message" => "ชำระเงินไม่สำเร็จ หรือ เกินเวลาที่กำหนด 5 วันเริ่มงาน/กิจกรรม!!",
+            "วันที่เริ่มงาน" => $eventData['start_at_date'],
+            "ผ่านมาแล้ว" => "$daysUntilEvent วัน"
+        ]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 });
 
 
 
-// put
-$app->put('/booking/update/details/{booking_id}', function (Request $request, Response $response, array $args) {
-    $bookingId = $args['booking_id'];
-    $body = $request->getBody();
-    $bodyArr = json_decode($body, true);
-    $conn = $GLOBALS['conn'];
 
-    $stmt = $conn->prepare("UPDATE booking SET booking_name = ?, size = ?, products = ?, zone_id = ? WHERE booking_id = ?");
-    $stmt->bind_param(
-        "sssii",
-        $bodyArr['booking_name'],
-        $bodyArr['size'],
-        $bodyArr['products'],
-        $bodyArr['zone_id'],
-        $bookingId
-    );
-    $stmt->execute();
-    $result = $stmt->affected_rows;
-    $response->getBody()->write($result . "");
-    return $response->withHeader('Content-type', 'application/json');
-});
+
+// put
+// $app->put('/booking/update/details/{booking_id}', function (Request $request, Response $response, array $args) {
+//     $bookingId = $args['booking_id'];
+//     $body = $request->getBody();
+//     $bodyArr = json_decode($body, true);
+//     $conn = $GLOBALS['conn'];
+
+//     $stmt = $conn->prepare("UPDATE booking SET booking_name = ?, size = ?, products = ?, zone_id = ? WHERE booking_id = ?");
+//     $stmt->bind_param(
+//         "sssii",
+//         $bodyArr['booking_name'],
+//         $bodyArr['size'],
+//         $bodyArr['products'],
+//         $bodyArr['zone_id'],
+//         $bookingId
+//     );
+//     $stmt->execute();
+//     $result = $stmt->affected_rows;
+//     $response->getBody()->write($result . "");
+//     return $response->withHeader('Content-type', 'application/json');
+// });
 
 
 // delete

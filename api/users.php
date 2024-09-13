@@ -86,49 +86,86 @@ $app->post('/users/register', function (Request $request, Response $response, ar
 });
 
 
-// put
-$app->put('/users/update/{users_id}', function (Request $request, Response $response, array $args) {
-    $eId = $args['users_id'];
+// Edit Name
+$app->put('/users/name/{users_id}', function (Request $request, Response $response, array $args) {
+    $userId = $args['users_id'];
     $body = $request->getBody();
     $bodyArr = json_decode($body, true);
     $conn = $GLOBALS['conn'];
-    $stmt = $conn->prepare("UPDATE users SET users_name = ?, amount = ?, event_id = ? WHERE users_id = ?");
-    $stmt->bind_param(
-        "siii",
-        $bodyArr['users_name'],
-        $bodyArr['amount'],
-        $bodyArr['event_id'],
-        $eId
-    );
-    $stmt->execute();
-    $result = $stmt->affected_rows;
 
-    if ($result > 0) {
-        $response->getBody()->write(json_encode(["message" => "อัพเดทข้อมูล สำเร็จ!!"]));
-    } else {
-        $response->getBody()->write(json_encode(["message" => "อัพเดทข้อมูล ไม่สำเร็จ!! หรือ ไม่พบ ID."]));
+    if (empty($bodyArr['pname']) || empty($bodyArr['fname']) || empty($bodyArr['lname']) || empty($bodyArr['phone']) || empty($bodyArr['email']) || empty($bodyArr['password'])) {
+        $response->getBody()->write(json_encode(['message' => "ข้อมูลไม่ครบถ้วน กรุณาตรวจกรอกให้ครบ!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+    
+    // ตรวจสอบความยาวรหัสผ่าน
+    if (strlen($bodyArr['password']) < 6) {
+        $response->getBody()->write(json_encode(['message' => "กรุณาใส่รหัสผ่าน 6 ตัวขึ้นไป!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 
-    return $response->withHeader('Content-type', 'application/json');
+    // ตรวจสอบว่าอีเมลมีอยู่ในฐานข้อมูลหรือไม่
+    $stmtCheckEmail = $conn->prepare("SELECT COUNT(*) as count FROM users WHERE email = ? AND user_id != ?");
+    $stmtCheckEmail->bind_param("si", $bodyArr['email'], $userId);
+    $stmtCheckEmail->execute();
+    $resultCheckEmail = $stmtCheckEmail->get_result();
+    $emailCount = $resultCheckEmail->fetch_assoc()['count'];
+
+    if ($emailCount > 0) {
+        $response->getBody()->write(json_encode(['message' => "อีเมลนี้ถูกใช้งานแล้ว กรุณาเลือกอีเมลอื่น!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
+    // ตรวจสอบสถานะการอัปเดต
+    $stmtUpdate = $conn->prepare("UPDATE users 
+        SET pname = ?, fname = ?, lname = ?, phone = ?, email = ?, password = ? 
+        WHERE user_id = ?"
+    );
+
+    // Hash password
+    $hashPassword = password_hash($bodyArr['password'], PASSWORD_DEFAULT);
+
+    // Bind parameters
+    $stmtUpdate->bind_param(
+        "ssssssi",
+        $bodyArr['pname'], 
+        $bodyArr['fname'],
+        $bodyArr['lname'],
+        $bodyArr['phone'],
+        $bodyArr['email'],
+        $hashPassword,
+        $userId
+    );
+
+    // Execute statement
+    if ($stmtUpdate->execute()) {
+        $response->getBody()->write(json_encode(["message" => "แก้ไขข้อมูลสำเร็จแล้ว ✅"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(200);
+    } else {
+        $response->getBody()->write(json_encode(["message" => "แก้ไขข้อมูลไม่สำเร็จ"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(500);
+    }
 });
+
+
 
 // delete
-$app->delete('/users/delete/{users_id}', function (Request $request, Response $response, array $args) {
-    $eId = $args['users_id'];
-    $conn = $GLOBALS['conn'];
-    $stmt = $conn->prepare("DELETE FROM users WHERE users_id = ?");
-    $stmt->bind_param("i", $eId);
-    $stmt->execute();
-    $result = $stmt->affected_rows;
+// $app->delete('/users/delete/{users_id}', function (Request $request, Response $response, array $args) {
+//     $eId = $args['users_id'];
+//     $conn = $GLOBALS['conn'];
+//     $stmt = $conn->prepare("DELETE FROM users WHERE users_id = ?");
+//     $stmt->bind_param("i", $eId);
+//     $stmt->execute();
+//     $result = $stmt->affected_rows;
 
-    if ($result > 0) {
-        $response->getBody()->write(json_encode(["message" => "ลบกิจกรรม สำเร็จ!!"]));
-    } else {
-        $response->getBody()->write(json_encode(["message" => "ลบกิจกรรม ไม่สำเร็จ!! หรือ ไม่พบ ID."]));
-    }
+//     if ($result > 0) {
+//         $response->getBody()->write(json_encode(["message" => "ลบกิจกรรม สำเร็จ!!"]));
+//     } else {
+//         $response->getBody()->write(json_encode(["message" => "ลบกิจกรรม ไม่สำเร็จ!! หรือ ไม่พบ ID."]));
+//     }
 
-    return $response->withHeader('Content-type', 'application/json');
-});
+//     return $response->withHeader('Content-type', 'application/json');
+// });
 
 //login
 $app->post('/users/login', function (Request $request, Response $response, array $args) {
@@ -174,10 +211,11 @@ $app->post('/users/login', function (Request $request, Response $response, array
                 $jwt = generate_jwt($userId);
 
                 // ค้นหาข้อมูลของผู้ใช้ที่ล็อกอิน
-                $stmt = $conn->prepare("SELECT * FROM users");
+                $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
                 if (!$stmt) {
                     throw new Exception("การเตรียมคำสั่ง SQL ผิดพลาด");
                 }
+                $stmt->bind_param("s", $bodyArr['email']);
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $data_users = array();
@@ -186,10 +224,11 @@ $app->post('/users/login', function (Request $request, Response $response, array
                 }
 
                 // ค้นหาการจองที่เกี่ยวข้องกับผู้ใช้ที่ล็อกอินเข้ามา
-                $stmt_booking = $conn->prepare("SELECT * FROM booking");
+                $stmt_booking = $conn->prepare("SELECT * FROM booking WHERE user_id = ?");
                 if (!$stmt_booking) {
                     throw new Exception("การเตรียมคำสั่ง SQL ผิดพลาด");
                 }
+                $stmt_booking->bind_param("i", $userId); // bind ค่า user_id ที่ได้จากการล็อกอิน
                 $stmt_booking->execute();
                 $result_booking = $stmt_booking->get_result();
                 $data_booking = array();
@@ -226,6 +265,7 @@ $app->post('/users/login', function (Request $request, Response $response, array
                         ->withStatus(400);
     }
 });
+
 
 
 // ฟังก์ชันสร้าง JWT
