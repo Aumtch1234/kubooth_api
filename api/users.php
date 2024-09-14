@@ -34,7 +34,7 @@ $app->post('/users/register', function (Request $request, Response $response, ar
         return $response->withHeader('Content-type', 'application/json')->withStatus(500);
     }
 
-    if (empty($bodyArr['email']) || empty($bodyArr['password']) || empty($bodyArr['fname']) || empty($bodyArr['lname']) || empty($bodyArr['phone'])) {
+    if (empty($bodyArr['email']) || empty($bodyArr['password']) || empty($bodyArr['pname']) || empty($bodyArr['fname']) || empty($bodyArr['lname']) || empty($bodyArr['phone'])) {
         $response->getBody()->write(json_encode(['message' => "ข้อมูลไม่ครบถ้วน กรุณาตรวจสอบ!!"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }else if(strlen($bodyArr['phone']) > 10) {
@@ -62,9 +62,10 @@ $app->post('/users/register', function (Request $request, Response $response, ar
 
     // ถ้าอีเมลไม่ซ้ำให้ทำการเพิ่มผู้ใช้
     $hashPassword = password_hash($bodyArr['password'], PASSWORD_DEFAULT);
-    $stmt = $conn->prepare("INSERT INTO users (fname, lname, email, password, phone) VALUES (?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO users (pname, fname, lname, email, password, phone) VALUES (?, ?, ?, ?, ?, ?)");
     $stmt->bind_param(
-        "sssss", // เปลี่ยน 'i' เป็น 's' เนื่องจากเบอร์โทรศัพท์อาจมีเครื่องหมายพิเศษ
+        "ssssss",
+        $bodyArr['pname'],
         $bodyArr['fname'],
         $bodyArr['lname'],
         $bodyArr['email'],
@@ -77,10 +78,10 @@ $app->post('/users/register', function (Request $request, Response $response, ar
     $stmt->close();
 
     if ($result > 0) {
-        $response->getBody()->write(json_encode(["message" => "เพิ่มข้อมูล สำเร็จ!!"]));
+        $response->getBody()->write(json_encode(["message" => "สมัครสมาชิก สำเร็จ!! 💖"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(201);
     } else {
-        $response->getBody()->write(json_encode(["message" => "เพิ่มข้อมูล ไม่สำเร็จ!!"]));
+        $response->getBody()->write(json_encode(["message" => "สมัครสมาชิก ไม่สำเร็จ!! 💫"]));
         return $response->withHeader('Content-type', 'application/json')->withStatus(500);
     }
 });

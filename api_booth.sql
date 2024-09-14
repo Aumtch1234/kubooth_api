@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 13, 2024 at 08:54 PM
+-- Generation Time: Sep 14, 2024 at 10:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,6 +40,13 @@ CREATE TABLE `booking` (
   `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `booking`
+--
+
+INSERT INTO `booking` (`booking_id`, `booking_date`, `booking_pay`, `booth_id`, `price`, `bill_img`, `booking_status`, `products_data`, `user_id`, `event_id`) VALUES
+(43, '2024-09-14 08:07:36', '2024-09-14 08:08:20', 43, 1500.5, 'bill_01.png', 'ยกเลิกการจอง', 'ขายขนมขาไก่', 37, 14);
+
 -- --------------------------------------------------------
 
 --
@@ -55,6 +62,13 @@ CREATE TABLE `booth` (
   `img` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `booth`
+--
+
+INSERT INTO `booth` (`booth_id`, `booth_name`, `size`, `status`, `price`, `img`) VALUES
+(43, 'Happy Places', '200*100', 'ว่าง', 1500.5, 'booth1.png');
+
 -- --------------------------------------------------------
 
 --
@@ -67,6 +81,13 @@ CREATE TABLE `events` (
   `start_at_date` date NOT NULL,
   `end_at_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `events`
+--
+
+INSERT INTO `events` (`event_id`, `event_name`, `start_at_date`, `end_at_date`) VALUES
+(14, 'ขายยาพารา', '2024-09-19', '2024-09-20');
 
 -- --------------------------------------------------------
 
@@ -84,8 +105,16 @@ CREATE TABLE `users` (
   `phone` varchar(10) NOT NULL,
   `create_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `update_at` timestamp NULL DEFAULT NULL,
-  `role` varchar(255) NOT NULL DEFAULT 'customer'
+  `role` enum('customer','admin','','') NOT NULL DEFAULT 'customer'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`user_id`, `pname`, `fname`, `lname`, `email`, `password`, `phone`, `create_at`, `update_at`, `role`) VALUES
+(36, 'นาง', 'สมศรี', 'บุญเรือง', 's1@gmail.com', '$2y$10$IdLNnEzb/GfrofHLfR2CXuXI38lvEAzEub55K.26T7x0pdwGn/jFa', '0989520103', '2024-09-14 07:46:16', NULL, 'customer'),
+(37, 'นาง', 'สมศรี', 'บุญเรือง', 's2@gmail.com', '$2y$10$VAsTVmqpfVIAbuvsGI/pXuA8jINrRUD6//yR3CN9bt2D5pgnKiEUG', '0989520103', '2024-09-14 07:53:07', NULL, 'customer');
 
 -- --------------------------------------------------------
 
@@ -99,6 +128,13 @@ CREATE TABLE `zone` (
   `amount_booth` int(11) NOT NULL,
   `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `zone`
+--
+
+INSERT INTO `zone` (`zone_id`, `zone_name`, `amount_booth`, `event_id`) VALUES
+(24, 'อาคาร 7', 10, 14);
 
 --
 -- Indexes for dumped tables
@@ -146,31 +182,31 @@ ALTER TABLE `zone`
 -- AUTO_INCREMENT for table `booking`
 --
 ALTER TABLE `booking`
-  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `booking_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `booth`
 --
 ALTER TABLE `booth`
-  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `user_id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
 
 --
 -- AUTO_INCREMENT for table `zone`
 --
 ALTER TABLE `zone`
-  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- Constraints for dumped tables

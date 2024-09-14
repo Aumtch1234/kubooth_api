@@ -49,6 +49,36 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 
+    // ตรวจสอบว่า booth_id มีอยู่ในตาราง booth หรือไม่
+    $stmtBooth = $conn->prepare("SELECT COUNT(*) as count FROM booth WHERE booth_id = ?");
+    $stmtBooth->bind_param('i', $bodyArr['booth_id']);
+    $stmtBooth->execute();
+    $resultBooth = $stmtBooth->get_result();
+    if ($resultBooth->fetch_assoc()['count'] == 0) {
+        $response->getBody()->write(json_encode(['message' => "ไม่พบบูธที่คุณเลือก กรุณาตรวจสอบอีกครั้ง!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
+    // ตรวจสอบว่า user_id มีอยู่ในตาราง users หรือไม่
+    $stmtUser = $conn->prepare("SELECT COUNT(*) as count FROM users WHERE user_id = ?");
+    $stmtUser->bind_param('i', $bodyArr['user_id']);
+    $stmtUser->execute();
+    $resultUser = $stmtUser->get_result();
+    if ($resultUser->fetch_assoc()['count'] == 0) {
+        $response->getBody()->write(json_encode(['message' => "ไม่พบลูกค้าที่คุณเลือก กรุณาตรวจสอบอีกครั้ง!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
+    // ตรวจสอบว่า event_id มีอยู่ในตาราง events หรือไม่
+    $stmtEvent = $conn->prepare("SELECT COUNT(*) as count FROM events WHERE event_id = ?");
+    $stmtEvent->bind_param('i', $bodyArr['event_id']);
+    $stmtEvent->execute();
+    $resultEvent = $stmtEvent->get_result();
+    if ($resultEvent->fetch_assoc()['count'] == 0) {
+        $response->getBody()->write(json_encode(['message' => "ไม่พบ(กิจกรรม/งาน) ที่คุณเลือก กรุณาตรวจสอบอีกครั้ง!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
     // ตรวจสอบสถานะของบูธ
     $status_stmt = $conn->prepare("SELECT status FROM booth WHERE booth_id = ?");
     $status_stmt->bind_param('i', $bodyArr['booth_id']);

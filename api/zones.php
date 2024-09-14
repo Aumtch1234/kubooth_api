@@ -61,6 +61,19 @@ $app->post('/zone/insert', function (Request $request, Response $response, array
         return $response->withHeader('Content-type', 'application/json')->withStatus(400);
     }
 
+    // ตรวจสอบว่า event_id มีอยู่ในตาราง events หรือไม่
+    $stmtEvent = $conn->prepare("SELECT COUNT(*) as count FROM events WHERE event_id = ?");
+    $stmtEvent->bind_param("i", $bodyArr['event_id']);
+    $stmtEvent->execute();
+    $resultEvent = $stmtEvent->get_result();
+    $rowEvent = $resultEvent->fetch_assoc();
+
+    if ($rowEvent['count'] == 0) {
+        // ถ้า event_id ไม่พบในตาราง events
+        $response->getBody()->write(json_encode(['message' => "ไม่พบงาน/กิจกรรมที่คุณเลือก กรุณาตรวจสอบรหัสงานอีกครั้ง!!"]));
+        return $response->withHeader('Content-type', 'application/json')->withStatus(400);
+    }
+
     // เตรียม statement สำหรับการ INSERT
     $stmt = $conn->prepare("INSERT INTO zone (zone_name, amount_booth, event_id) 
         VALUES (?, ?, ?)"
@@ -85,6 +98,7 @@ $app->post('/zone/insert', function (Request $request, Response $response, array
         return $response->withHeader('Content-type', 'application/json')->withStatus(500);
     }
 });
+
 
 // put
 $app->put('/zone/update/{zone_id}', function (Request $request, Response $response, array $args) {
