@@ -7,35 +7,34 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 // get
-$app->get('/booking', function (Request $request, Response $response, $args) {
-    $conn = $GLOBALS['conn'];
-    $stmt = $conn->prepare("select * From booking");
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = array();
-    while ($row = $result->fetch_assoc()) {
-        array_push($data, $row);
-    }
-    $json = json_encode($data);
-    $response->getBody()->write($json);
-    return $response->withHeader('Content-type', 'application/json');
-});
-
-$app->get('/booking/{booking_id}', function (Request $request, Response $response, $args) {
-    $eId = $args['booking_id'];
-    $conn = $GLOBALS['conn'];
-    $stmt = $conn->prepare("select * From booking WHERE booking_id = ?");
-    $stmt->bind_param("i", $eId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = array();
-    while ($row = $result->fetch_assoc()) {
-        array_push($data, $row);
-    }
-    $json = json_encode($data);
-    $response->getBody()->write($json);
-    return $response->withHeader('Content-type', 'application/json');
-});
+// $app->get('/booking', function (Request $request, Response $response, $args) {
+//     $conn = $GLOBALS['conn'];
+//     $stmt = $conn->prepare("select * From booking");
+//     $stmt->execute();
+//     $result = $stmt->get_result();
+//     $data = array();
+//     while ($row = $result->fetch_assoc()) {
+//         array_push($data, $row);
+//     }
+//     $json = json_encode($data);
+//     $response->getBody()->write($json);
+//     return $response->withHeader('Content-type', 'application/json');
+// });
+// $app->get('/booking/{booking_id}', function (Request $request, Response $response, $args) {
+//     $eId = $args['booking_id'];
+//     $conn = $GLOBALS['conn'];
+//     $stmt = $conn->prepare("select * From booking WHERE booking_id = ?");
+//     $stmt->bind_param("i", $eId);
+//     $stmt->execute();
+//     $result = $stmt->get_result();
+//     $data = array();
+//     while ($row = $result->fetch_assoc()) {
+//         array_push($data, $row);
+//     }
+//     $json = json_encode($data);
+//     $response->getBody()->write($json);
+//     return $response->withHeader('Content-type', 'application/json');
+// });
 
 //booking
 $app->post('/booking/booth_booking', function (Request $request, Response $response, array $args) {
@@ -86,7 +85,7 @@ $app->post('/booking/booth_booking', function (Request $request, Response $respo
     $status_result = $status_stmt->get_result();
     $status_result_use = $status_result->fetch_assoc();
 
-    if (!$status_result_use || ($status_result_use['status'] === "อยู่ระหว่างการตรวจสอบ" || $status_result_use['status'] === "จองแล้ว")) {
+    if (!$status_result_use || ($status_result_use['status'] === "อยู่ระหว่างการตรวจสอบ" || $status_result_use['status'] === "จองแล้ว" || $status_result_use['status'] === "จอง")){
         $response->getBody()->write(json_encode([
             "message" => "บูธนี้ไม่สามารถจองได้เนื่องจากอยู่ในสถานะ " . ($status_result_use['status'] ?? 'ไม่พบข้อมูลบูธ')
         ]));

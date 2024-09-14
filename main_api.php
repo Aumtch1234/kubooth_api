@@ -40,5 +40,7 @@ require __DIR__ .'/api/zones.php';
 require __DIR__ .'/api/booths.php';
 require __DIR__ .'/api/users.php';
 require __DIR__ .'/api/booking.php';
+require __DIR__ .'/api/approve.php';
+require __DIR__ .'/api/report_data.php';
 
 $app->run();

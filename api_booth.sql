@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 14, 2024 at 10:21 AM
+-- Generation Time: Sep 14, 2024 at 04:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,18 +34,11 @@ CREATE TABLE `booking` (
   `booth_id` int(11) NOT NULL,
   `price` double NOT NULL,
   `bill_img` varchar(255) DEFAULT NULL,
-  `booking_status` enum('อยู่ระหว่างการตรวจสอบ','ชำระเงินแล้ว','ยกเลิกการจอง') NOT NULL DEFAULT 'อยู่ระหว่างการตรวจสอบ',
+  `booking_status` enum('ชำระเงินแล้ว','ยกเลิกการจอง','อนุมัติแล้ว','จอง') NOT NULL DEFAULT 'จอง',
   `products_data` varchar(255) NOT NULL,
   `user_id` int(11) NOT NULL,
   `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `booking`
---
-
-INSERT INTO `booking` (`booking_id`, `booking_date`, `booking_pay`, `booth_id`, `price`, `bill_img`, `booking_status`, `products_data`, `user_id`, `event_id`) VALUES
-(43, '2024-09-14 08:07:36', '2024-09-14 08:08:20', 43, 1500.5, 'bill_01.png', 'ยกเลิกการจอง', 'ขายขนมขาไก่', 37, 14);
 
 -- --------------------------------------------------------
 
@@ -59,15 +52,9 @@ CREATE TABLE `booth` (
   `size` varchar(255) NOT NULL,
   `status` enum('ว่าง','อยู่ระหว่างการตรวจสอบ','จองแล้ว') NOT NULL DEFAULT 'ว่าง',
   `price` double NOT NULL,
+  `zone_id` int(11) NOT NULL,
   `img` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `booth`
---
-
-INSERT INTO `booth` (`booth_id`, `booth_name`, `size`, `status`, `price`, `img`) VALUES
-(43, 'Happy Places', '200*100', 'ว่าง', 1500.5, 'booth1.png');
 
 -- --------------------------------------------------------
 
@@ -81,13 +68,6 @@ CREATE TABLE `events` (
   `start_at_date` date NOT NULL,
   `end_at_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `events`
---
-
-INSERT INTO `events` (`event_id`, `event_name`, `start_at_date`, `end_at_date`) VALUES
-(14, 'ขายยาพารา', '2024-09-19', '2024-09-20');
 
 -- --------------------------------------------------------
 
@@ -108,14 +88,6 @@ CREATE TABLE `users` (
   `role` enum('customer','admin','','') NOT NULL DEFAULT 'customer'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`user_id`, `pname`, `fname`, `lname`, `email`, `password`, `phone`, `create_at`, `update_at`, `role`) VALUES
-(36, 'นาง', 'สมศรี', 'บุญเรือง', 's1@gmail.com', '$2y$10$IdLNnEzb/GfrofHLfR2CXuXI38lvEAzEub55K.26T7x0pdwGn/jFa', '0989520103', '2024-09-14 07:46:16', NULL, 'customer'),
-(37, 'นาง', 'สมศรี', 'บุญเรือง', 's2@gmail.com', '$2y$10$VAsTVmqpfVIAbuvsGI/pXuA8jINrRUD6//yR3CN9bt2D5pgnKiEUG', '0989520103', '2024-09-14 07:53:07', NULL, 'customer');
-
 -- --------------------------------------------------------
 
 --
@@ -128,13 +100,6 @@ CREATE TABLE `zone` (
   `amount_booth` int(11) NOT NULL,
   `event_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `zone`
---
-
-INSERT INTO `zone` (`zone_id`, `zone_name`, `amount_booth`, `event_id`) VALUES
-(24, 'อาคาร 7', 10, 14);
 
 --
 -- Indexes for dumped tables
@@ -153,7 +118,8 @@ ALTER TABLE `booking`
 -- Indexes for table `booth`
 --
 ALTER TABLE `booth`
-  ADD PRIMARY KEY (`booth_id`);
+  ADD PRIMARY KEY (`booth_id`),
+  ADD KEY `booth_zone_FK` (`zone_id`);
 
 --
 -- Indexes for table `events`
@@ -188,13 +154,13 @@ ALTER TABLE `booking`
 -- AUTO_INCREMENT for table `booth`
 --
 ALTER TABLE `booth`
-  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `booth_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `event_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -206,7 +172,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `zone`
 --
 ALTER TABLE `zone`
-  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `zone_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- Constraints for dumped tables
@@ -219,6 +185,12 @@ ALTER TABLE `booking`
   ADD CONSTRAINT `booking_booth_FK` FOREIGN KEY (`booth_id`) REFERENCES `booth` (`booth_id`),
   ADD CONSTRAINT `booking_events_FK` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`),
   ADD CONSTRAINT `booking_users_FK` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `booth`
+--
+ALTER TABLE `booth`
+  ADD CONSTRAINT `booth_zone_FK` FOREIGN KEY (`zone_id`) REFERENCES `zone` (`zone_id`);
 
 --
 -- Constraints for table `zone`

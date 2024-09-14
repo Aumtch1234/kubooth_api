@@ -221,9 +221,6 @@ $app->post('/users/login', function (Request $request, Response $response, array
 
                 // ค้นหาข้อมูลของผู้ใช้ที่ล็อกอิน
                 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-                if (!$stmt) {
-                    throw new Exception("การเตรียมคำสั่ง SQL ผิดพลาด");
-                }
                 $stmt->bind_param("s", $bodyArr['email']);
                 $stmt->execute();
                 $result = $stmt->get_result();
