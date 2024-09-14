@@ -1,0 +1,674 @@
+{
+	"info": {
+		"_postman_id": "8ea158e0-9ed0-418f-877b-0e21af078e4f",
+		"name": "kucscBoothAPI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36656176"
+	},
+	"item": [
+		{
+			"name": "general",
+			"item": [
+				{
+					"name": "users_register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/users/insert",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"users",
+								"insert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "zone(all/select)",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "booths(all/select)",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "customer",
+			"item": [
+				{
+					"name": "cancel_booking",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "sd",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "a",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/booking/cancel/27",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"booking",
+								"cancel",
+								"27"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\":\"a1@gmail.com\",\r\n    \"password\":\"aaaaaa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "zone(all/select) Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/zone",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"zone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "booths(all/select) Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/booth",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"booth"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"bill_img\": \"biill_04.png\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/booking/update/payment/5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"booking",
+								"update",
+								"payment",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ิfor_booking",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"booth_id\": 32,\r\n    \"price\": 1500.125,\r\n    \"bill_img\": \"bill_01.png\",\r\n    \"booking_status\": \"กำลังดำเนินการ\",\r\n    \"products_data\": \"อาหารทะเล ปลาหมึก กุ้ง หอย ปู ปูม้า\",\r\n    \"user_id\": 34,\r\n    \"event_id\": 8\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/booking/booth_booking",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"booking",
+								"booth_booking"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ReData_user",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"pname\":\"นาย\",\r\n    \"fname\":\"ทวีโชค\",\r\n    \"lname\":\"คำภูษา\",\r\n    \"phone\":\"0989520103\",\r\n    \"email\":\"a1@gmail.com\",\r\n    \"password\":\"aaa\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost/web_app/api_booth/users/name/34",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"path": [
+								"web_app",
+								"api_booth",
+								"users",
+								"name",
+								"34"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "events",
+					"item": [
+						{
+							"name": "event_insert",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"event_name\": \"ขายยา\",\r\n    \"start_at_date\": \"2024-08-25\",\r\n    \"end_at_date\": \"2024-08-30\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/events/insert",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"events",
+										"insert"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "event_edit",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"event_name\": \"ขายยาบ้า\",\r\n    \"start_at_date\": \"2024-08-23\",\r\n    \"end_at_date\": \"2024-08-31\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/events/update/4",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"events",
+										"update",
+										"4"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "event_delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/events/delete/6",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"events",
+										"delete",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "zones",
+					"item": [
+						{
+							"name": "zone_insert",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/zone/insert",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"zone",
+										"insert"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "zone_edit",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/zone/update/4",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"zone",
+										"update",
+										"4"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "zone_delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/zone/delete/6",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"zone",
+										"delete",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "booths",
+					"item": [
+						{
+							"name": "booth_insert",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"booth_name\":\"Happy Place\",\r\n    \"size\":\"200*100\",\r\n    \"products\":\"ปูม้า แต่ปูหมดเหลือแต่ม้า\",\r\n    \"zone_id\":16\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/booth/insert",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"booth",
+										"insert"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "booth_edit",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"booth_name\":\"Happy Place\",\r\n    \"size\":\"200*100\",\r\n    \"products\":\"ปูม้า แต่ปูหมดเหลือแต่ม้า\",\r\n    \"zone_id\":16\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/booth/update/14",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"booth",
+										"update",
+										"14"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "booth_delete",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/booth/delete/12",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"booth",
+										"delete",
+										"12"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "approve",
+					"item": [
+						{
+							"name": "approve",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/admin/booking/approve/1",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"admin",
+										"booking",
+										"approve",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "report_data",
+					"item": [
+						{
+							"name": "users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/admin/report_data/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"admin",
+										"report_data",
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "no_payment",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/admin/report_data/no_payment",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"admin",
+										"report_data",
+										"no_payment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "booth_approve",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "boot_booking_complete",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "test/ยังไม่ได้ใช้",
+			"item": [
+				{
+					"name": "CRUD_Users",
+					"item": [
+						{
+							"name": "users(all/select)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/users",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"users"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "CRUD_Booking",
+					"item": [
+						{
+							"name": "booking(all/select)",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost/web_app/api_booth/booking",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"path": [
+										"web_app",
+										"api_booth",
+										"booking"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
