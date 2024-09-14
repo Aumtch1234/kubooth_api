@@ -429,6 +429,14 @@
 								}
 							},
 							"response": []
+						},
+						{
+							"name": "events_check",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
 						}
 					]
 				},
@@ -596,7 +604,15 @@
 							"response": []
 						},
 						{
-							"name": "booth_approve",
+							"name": "payment",
+							"request": {
+								"method": "GET",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "booth_waitng",
 							"request": {
 								"method": "GET",
 								"header": []
